@@ -309,7 +309,7 @@ extern "C" void app_main() {
     nvs_init();
     sd_init();
     station_init();
-    // csi_init((char *) "STA");
+    csi_init((char *) "STA");
 #if !(SHOULD_COLLECT_CSI)
     printf("CSI will not be collected. Check `idf.py menuconfig  # > ESP32 CSI Tool Config` to enable CSI");
 #endif
