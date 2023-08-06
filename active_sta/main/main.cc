@@ -22,6 +22,7 @@
 #include "../../_components/input_component.h"
 #include "../../_components/sockets_component.h"
 
+
 /*
  * The examples use WiFi configuration that you can set via 'idf.py menuconfig'.
  *
@@ -185,17 +186,25 @@ void config_print() {
 }
 
 
-static uint8_t mydata[] = "Pauloo";
+static uint8_t dummy[] = "NULL";
+static uint8_t detected_event[] = "SIT";
+
+static char power_data[11];
 static osjob_t sendjob;
-const unsigned TX_INTERVAL = 2;
+const unsigned TX_INTERVAL = 10;
 extern "C" void do_send(osjob_t* j){
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
     // Check if there is not a current TX/RX job running
     if (LMIC.opmode & OP_TXRXPEND) {
         printf(("OP_TXRXPEND, not sending"));
     } else {
-        // Prepare upstream data transmission at the next possible time.
-        LMIC_setTxData2(1, mydata, sizeof(mydata)-1, 0);
-        printf(("Packet queued"));
+        if (should_send_lora_packet) {
+            LMIC_setTxData2(1, (uint8_t*) detected_event, sizeof(detected_event)-1, 0);
+            should_send_lora_packet = 0;
+        } else {
+            LMIC_setTxData2(1, (uint8_t*) dummy, sizeof(dummy)-1, 0);
+        }
     }
     // Next TX is scheduled after TX_COMPLETE event.
 }
@@ -203,64 +212,64 @@ extern "C" void do_send(osjob_t* j){
 
 extern "C" void onEvent (ev_t ev) {
     printf("%d", os_getTime());
-    printf(": ");
-    printf("Freq: %d", LMIC.freq);
+    printf(": \n");
     switch(ev) {
         case ev_t::EV_SCAN_TIMEOUT:
-            printf(("EV_SCAN_TIMEOUT"));
+            printf(("EV_SCAN_TIMEOUT\n"));
             break;
         case ev_t::EV_BEACON_FOUND:
-            printf(("EV_BEACON_FOUND"));
+            printf(("EV_BEACON_FOUND\n"));
             break;
         case ev_t::EV_BEACON_MISSED:
-            printf(("EV_BEACON_MISSED"));
+            printf(("EV_BEACON_MISSED\n"));
             break;
         case ev_t::EV_BEACON_TRACKED:
-            printf(("EV_BEACON_TRACKED"));
+            printf(("EV_BEACON_TRACKED\n"));
             break;
         case ev_t::EV_JOINING:
-            printf(("EV_JOINING"));
+            printf(("EV_JOINING\n"));
             break;
         case ev_t::EV_JOINED:
-            printf(("EV_JOINED"));
+            printf(("EV_JOINED\n"));
             break;
         case ev_t::EV_JOIN_FAILED:
-            printf(("EV_JOIN_FAILED"));
+            printf(("EV_JOIN_FAILED\n"));
             break;
         case ev_t::EV_REJOIN_FAILED:
-            printf(("EV_REJOIN_FAILED"));
+            printf(("EV_REJOIN_FAILED\n"));
             break;
         case ev_t::EV_TXCOMPLETE:
-            printf(("EV_TXCOMPLETE (includes waiting for RX windows)"));
+            printf(("EV_TXCOMPLETE (includes waiting for RX windows)\n\n"));
             if (LMIC.txrxFlags & TXRX_ACK)
-              printf(("Received ack"));
+              printf(("Received ack\n"));
             if (LMIC.dataLen) {
               printf(("Received "));
               printf("%d", LMIC.dataLen);
-              printf((" bytes of payload"));
+              printf((" bytes of payload\n"));
             }
             // Schedule next transmission
-            os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(TX_INTERVAL), do_send);
+            //os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(TX_INTERVAL), do_send);
+            do_send(&sendjob);
             break;
         case ev_t::EV_LOST_TSYNC:
-            printf(("EV_LOST_TSYNC"));
+            printf(("EV_LOST_TSYNC\n"));
             break;
         case ev_t::EV_RESET:
-            printf(("EV_RESET"));
+            printf(("EV_RESET\n"));
             break;
         case ev_t::EV_RXCOMPLETE:
             // data received in ping slot
-            printf(("EV_RXCOMPLETE"));
+            printf(("EV_RXCOMPLETE\n"));
             break;
         case ev_t::EV_LINK_DEAD:
-            printf(("EV_LINK_DEAD"));
+            printf(("EV_LINK_DEAD\n"));
             break;
         case ev_t::EV_LINK_ALIVE:
-            printf(("EV_LINK_ALIVE"));
+            printf(("EV_LINK_ALIVE\n"));
             break;
         default:
             printf(("Unknown event: "));
-            printf("%d", (unsigned) ev);
+            printf("%d\n", (unsigned) ev);
             break;
     }
 }
@@ -286,8 +295,8 @@ extern "C" void lora_task(void *p) {
     os_init();
     LMIC_reset();
     LMIC_setSession(0x13, DEVADDR, (xref2u1_t)&NWKSKEY, (xref2u1_t)&APPSKEY);
-    LMIC.freq = 916200000;
-    LMIC.dn2Freq = 916200000;
+    LMIC.freq = 903100000;
+    LMIC.dn2Freq = 903100000;
     LMIC.datarate = DR_SF7;
     LMIC.txpow = 20;
     LMIC.rps = updr2rps(LMIC.datarate);
@@ -304,6 +313,7 @@ extern "C" void lora_task(void *p) {
 
 }
 
+
 extern "C" void app_main() {
     config_print();
     nvs_init();
@@ -314,7 +324,7 @@ extern "C" void app_main() {
     printf("CSI will not be collected. Check `idf.py menuconfig  # > ESP32 CSI Tool Config` to enable CSI");
 #endif
 
-    // xTaskCreatePinnedToCore(&vTask_socket_transmitter_sta_loop, "socket_transmitter_sta_loop",
-    //                        10000, (void *) &is_wifi_connected, 100, &xHandle, 1);
-    xTaskCreatePinnedToCore(&lora_task, "lora_task", 2048, NULL, 5, NULL, 0);
+    xTaskCreatePinnedToCore(&vTask_socket_transmitter_sta_loop, "socket_transmitter_sta_loop",
+                            10000, (void *) &is_wifi_connected, 100, &xHandle, 1);
+    xTaskCreatePinnedToCore(&lora_task, "lora_task", 8192, NULL, 5, NULL, 0);
 }
