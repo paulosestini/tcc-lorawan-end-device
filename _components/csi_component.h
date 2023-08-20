@@ -7,7 +7,9 @@
 #include <iostream>
 
 #include <eigen3/Eigen/Eigen>
-using Eigen::MatrixXd;
+using Eigen::MatrixXf;
+using Eigen::VectorXf;
+using Eigen::ArrayXf;
 
 char *project_type;
 
@@ -22,13 +24,63 @@ SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
 // --------
 const int MAX_FRAMES = 500;
 const int N_SUBPORTERS = 64;
-const float THRESHOLD_DETECTION = 0.03;
-float frames[MAX_FRAMES][N_SUBPORTERS];
-float powers[MAX_FRAMES];
+const int N_NON_NULL_SUBPORTERS = 52;
+const int WINDOW_SIZE = 15;
+const float THRESHOLD_DETECTION = 0.07;
+float reference_power = 0;
+float current_power = 0;
+MatrixXf frames(MAX_FRAMES, N_NON_NULL_SUBPORTERS);
+ArrayXf powers(MAX_FRAMES);
+ArrayXf csi_vector(N_NON_NULL_SUBPORTERS);
 int collected_frames = 0;
-float reference_power;
-int detected = 0;
-int should_send_lora_packet = 0;
+bool detected = false;
+bool should_send_lora_packet = false;
+
+void process_csi(ArrayXf full_csi_vector, float rssi) {
+  csi_vector << full_csi_vector(Eigen::seq(6, 31)), full_csi_vector(Eigen::seq(33, 58));
+
+  float rssi_power = pow(10, rssi/10);
+  float scale_factor = rssi_power / (csi_vector.sum() / N_NON_NULL_SUBPORTERS);
+  scale_factor = sqrt(scale_factor);
+
+  csi_vector *= scale_factor;
+  csi_vector = 10 * (csi_vector + 1e-10 ).log10();
+
+  if(collected_frames < MAX_FRAMES) {
+    frames.row(collected_frames) = csi_vector;
+  } else {
+    if(collected_frames == MAX_FRAMES) {
+      reference_power = frames.sum() / MAX_FRAMES;
+
+      printf("\n\n ----REFERENCE ESTABLISHED---- \n\n");
+    } else {
+      current_power = frames(Eigen::seq(MAX_FRAMES - WINDOW_SIZE, MAX_FRAMES-1), Eigen::all).sum();
+      current_power /= WINDOW_SIZE;
+
+        printf("Current power: %f, Reference power: %f \n", current_power, reference_power);
+
+
+      if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power) {
+        if(!detected) {
+          printf("\n DETECTED \n");
+          should_send_lora_packet = true;
+          detected = true;
+        } else {
+          detected = false;
+        }
+        
+      }
+    }
+
+    frames << frames(Eigen::seq(1, MAX_FRAMES-1), Eigen::all), csi_vector.transpose();
+  } 
+  
+  collected_frames += 1;
+
+  return;
+}
+
+
 // --------
 
 void _wifi_csi_cb(void *ctx, wifi_csi_info_t *data) {
@@ -83,85 +135,15 @@ int8_t *my_ptr;
 #endif
 
 // -------------------------
-    float csi_vector[N_SUBPORTERS];
-    float sum_of_amplitudes = 0;
+    ArrayXf full_csi_vector(N_SUBPORTERS);;
 
     my_ptr = data->buf;
     for (int i = 0; i < data_len / 2; i++) {
-        csi_vector[i] = (float) sqrt(pow(my_ptr[i * 2], 2) + pow(my_ptr[(i * 2) + 1], 2));
-        sum_of_amplitudes += csi_vector[i];
+        full_csi_vector(i) = (float) sqrt(pow(my_ptr[i * 2], 2) + pow(my_ptr[(i * 2) + 1], 2));
     }
 
-    float rssi_power = pow(10, d.rx_ctrl.rssi/10);
-    float scale_factor = rssi_power / (sum_of_amplitudes / N_SUBPORTERS);
-    scale_factor = sqrt(scale_factor);
+    process_csi(full_csi_vector, d.rx_ctrl.rssi);
 
-
-    for (int i = 0; i < data_len / 2; i++) {
-        csi_vector[i] *= scale_factor;
-        csi_vector[i] = 10 * log10(csi_vector[i] + 1e-30);
-
-
-    }
-
-    float sum_of_amplitudes_in_dbm = 0;
-    for (int i = 0; i < N_SUBPORTERS; i++) {
-        sum_of_amplitudes_in_dbm += csi_vector[i];
-    }
-
-    if (collected_frames < MAX_FRAMES) {
-        for (int i = 0; i < N_SUBPORTERS; i++) {
-            frames[collected_frames][i] = csi_vector[i];
-        }
-
-
-        powers[collected_frames] = sum_of_amplitudes_in_dbm;
-    } else {
-        if (collected_frames == MAX_FRAMES) {
-            for(int i = 0; i < MAX_FRAMES; i++) {
-                reference_power += powers[i];
-            }
-            reference_power /= MAX_FRAMES;
-
-            printf("\n\n ----REFERENCE ESTABLISHED---- \n\n");
-        } else {
-            float current_power = 0;
-            int window_size = 50;
-            for(int i = MAX_FRAMES - window_size; i < MAX_FRAMES; i++) {
-                current_power += powers[i];
-            }
-            current_power /= window_size;
-
-            
-            if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power) {
-                if (!detected) {
-                    printf("\n DETECTED \n");
-                    should_send_lora_packet = 1;
-                    detected = 1;
-                }
-            } else {
-                detected = 0;
-            }
-
-            printf("Current power: %f, Reference power: %f \n", current_power, reference_power);
-        }
-
-
-
-        for(int i = 0; i < MAX_FRAMES-1; i++) {
-            for(int j = 0; j < N_SUBPORTERS; j++) {
-                frames[i][j] = frames[i+1][j];
-            }
-            powers[i] = powers[i+1];
-        }
-
-        for(int j = 0; j < N_SUBPORTERS; j++) {
-            frames[MAX_FRAMES-1][j] = csi_vector[j];
-        }
-        powers[MAX_FRAMES-1] = sum_of_amplitudes_in_dbm;
-    }
-
-    collected_frames += 1;
 
 // -------------------------
 #if CSI_AMPLITUDE

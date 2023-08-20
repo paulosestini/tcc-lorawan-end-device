@@ -8,7 +8,7 @@ using Eigen::ArrayXd;
 const int MAX_FRAMES = 500;
 const int N_SUBPORTERS = 52;
 const int WINDOW_SIZE = 50;
-const float THRESHOLD_DETECTION = 0.03;
+const float THRESHOLD_DETECTION = 0.05;
 double reference_power = 0;
 double current_power = 0;
 MatrixXd frames(MAX_FRAMES, N_SUBPORTERS);
@@ -44,6 +44,9 @@ void process_Csi(ArrayXd full_csi_vector, double rssi) {
       current_power = frames(Eigen::seq(MAX_FRAMES - WINDOW_SIZE, MAX_FRAMES-1), Eigen::all).sum();
       current_power /= WINDOW_SIZE;
 
+      printf("Current power: %f, Reference power: %f \n", current_power, reference_power);
+
+
       if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power) {
         if(!detected) {
           printf("\n DETECTED \n");
@@ -52,8 +55,6 @@ void process_Csi(ArrayXd full_csi_vector, double rssi) {
         } else {
           detected = false;
         }
-        
-        printf("Current power: %f, Reference power: %f \n", current_power, reference_power);
       }
     }
 
