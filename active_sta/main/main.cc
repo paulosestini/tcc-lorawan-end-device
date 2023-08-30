@@ -187,11 +187,11 @@ void config_print() {
 
 
 static uint8_t dummy[] = "NULL";
-static uint8_t detected_event[] = "SIT";
+static uint8_t detected_event[] = "EVENT DETECTED";
 
 static char power_data[11];
 static osjob_t sendjob;
-const unsigned TX_INTERVAL = 10;
+const unsigned TX_INTERVAL = 1;
 extern "C" void do_send(osjob_t* j){
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
@@ -295,8 +295,10 @@ extern "C" void lora_task(void *p) {
     os_init();
     LMIC_reset();
     LMIC_setSession(0x13, DEVADDR, (xref2u1_t)&NWKSKEY, (xref2u1_t)&APPSKEY);
-    LMIC.freq = 903100000;
-    LMIC.dn2Freq = 903100000;
+    //LMIC.freq = 903100000;
+    //LMIC.dn2Freq = 903100000;
+    LMIC.freq = 916000000;
+    LMIC.dn2Freq = 916000000;
     LMIC.datarate = DR_SF7;
     LMIC.txpow = 20;
     LMIC.rps = updr2rps(LMIC.datarate);
