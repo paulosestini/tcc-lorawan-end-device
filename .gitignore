@@ -1,2 +1,4 @@
+export.ps1
 active_ap/build
 active_sta/build
+active_*/managed_components/espressif__eigen/.component_hash
