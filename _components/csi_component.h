@@ -7,9 +7,12 @@
 #include <iostream>
 
 #include <eigen3/Eigen/Eigen>
+using Eigen::Array;
 using Eigen::MatrixXf;
 using Eigen::VectorXf;
 using Eigen::ArrayXf;
+using Eigen::ArrayXXf;
+
 
 char *project_type;
 
@@ -21,6 +24,7 @@ char *project_type;
 
 SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
 
+typedef unsigned int uint;
 // --------
 const int MAX_FRAMES = 500;
 const int N_SUBPORTERS = 64;
@@ -30,13 +34,74 @@ const float THRESHOLD_DETECTION = 0.3;
 float reference_power = 0;
 float current_power = 0;
 MatrixXf frames(MAX_FRAMES, N_NON_NULL_SUBPORTERS);
+//ArrayXXf frames(MAX_FRAMES, N_NON_NULL_SUBPORTERS);
 ArrayXf powers(MAX_FRAMES);
 ArrayXf csi_vector(N_NON_NULL_SUBPORTERS);
+ArrayXf subporters_frame_mean(N_NON_NULL_SUBPORTERS);
+ArrayXf subporters_frame_std_dev(N_NON_NULL_SUBPORTERS);
+ArrayXf full_lora_payload(2*N_NON_NULL_SUBPORTERS);
+Array<uint8_t, 1, 4*N_NON_NULL_SUBPORTERS> lora_payload;
 int collected_frames = 0;
 bool detected = false;
 bool should_send_lora_packet = false;
 
+
+uint as_uint(const float x) {
+    return *(uint*)&x;
+}
+float as_float(const uint x) {
+    return *(float*)&x;
+}
+
+float half_to_float(const uint16_t x) { // IEEE-754 16-bit floating-point format (without infinity): 1-5-10, exp-15, +-131008.0, +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
+    const uint e = (x&0x7C00)>>10; // exponent
+    const uint m = (x&0x03FF)<<13; // mantissa
+    const uint v = as_uint((float)m)>>23; // evil log2 bit hack to count leading zeros in denormalized format
+    return as_float((x&0x8000)<<16 | (e!=0)*((e+112)<<23|m) | ((e==0)&(m!=0))*((v-37)<<23|((m<<(150-v))&0x007FE000))); // sign : normalized : denormalized
+}
+uint16_t float_to_half(const float x) { // IEEE-754 16-bit floating-point format (without infinity): 1-5-10, exp-15, +-131008.0, +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
+    const uint b = as_uint(x)+0x00001000; // round-to-nearest-even: add last bit after truncated mantissa
+    const uint e = (b&0x7F800000)>>23; // exponent
+    const uint m = b&0x007FFFFF; // mantissa; in line below: 0x007FF000 = 0x00800000-0x00001000 = decimal indicator flag - initial rounding
+    return (b&0x80000000)>>16 | (e>112)*((((e-112)<<10)&0x7C00)|m>>13) | ((e<113)&(e>101))*((((0x007FF000+m)>>(125-e))+1)>>1) | (e>143)*0x7FFF; // sign : normalized : denormalized : saturate
+}
+
+void print_bits(const uint16_t x) {
+    for(int i=15; i>=0; i--) {
+        std::cout << ((x>>i)&1);
+        if(i==15||i==10) std::cout << " ";
+        if(i==10) std::cout << "      ";
+    }
+    std::cout << '\n';
+}
+
+void print_bits(const float x) {
+    uint b = *(uint*)&x;
+    for(int i=31; i>=0; i--) {
+        std::cout << ((b>>i)&1);
+        if(i==31||i==23) std::cout << " ";
+        if(i==23) std::cout << "   ";
+    }
+    std::cout << '\n';
+}
+
+uint8_t get_high(uint16_t val){
+    return uint8_t(val >> 8);
+}
+
+uint8_t get_low(uint16_t val){
+    return uint8_t(val & 0xFF);
+}
+
+void print_bits8(uint8_t value) {
+    for (int i = 7; i >= 0; --i) {
+        std::cout << ((value >> i) & 1);
+    }
+    std::cout << std::endl;
+}
+
 void process_csi(ArrayXf full_csi_vector, float rssi) {
+
   csi_vector << full_csi_vector(Eigen::seq(6, 31)), full_csi_vector(Eigen::seq(33, 58));
 
   float rssi_power = pow(10, rssi/10);
@@ -54,7 +119,7 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
 
       printf("\n\n ----REFERENCE ESTABLISHED---- \n\n");
     } else {
-      current_power = frames(Eigen::seq(MAX_FRAMES - WINDOW_SIZE, MAX_FRAMES-1), Eigen::all).sum();
+      current_power = frames(Eigen::seq(MAX_FRAMES/2 - WINDOW_SIZE, MAX_FRAMES/2-1), Eigen::all).sum();
       current_power /= WINDOW_SIZE;
 
         printf("Current power: %f, Reference power: %f \n", current_power, reference_power);
@@ -63,6 +128,21 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power) {
         if(!detected) {
           printf("\n DETECTED \n");
+          subporters_frame_mean << frames.transpose().rowwise().mean().array();
+          subporters_frame_std_dev = ((frames.transpose().array().colwise() - subporters_frame_mean).square().rowwise().sum()/N_NON_NULL_SUBPORTERS).sqrt().array(); // standard deviation
+          Array<uint16_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_mean_half = subporters_frame_mean.unaryExpr(&float_to_half).transpose();
+          Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_mean_high = subporters_frame_mean_half.unaryExpr(&get_high);
+          Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_mean_low = subporters_frame_mean_half.unaryExpr(&get_low);
+          
+          Array<uint16_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_std_dev_half = subporters_frame_std_dev.unaryExpr(&float_to_half).transpose();
+          Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_std_dev_high = subporters_frame_std_dev_half.unaryExpr(&get_high);
+          Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_std_dev_low = subporters_frame_std_dev_half.unaryExpr(&get_low);
+          
+          
+          full_lora_payload << subporters_frame_mean, subporters_frame_std_dev;
+          lora_payload << subporters_frame_mean_high, subporters_frame_mean_low, subporters_frame_std_dev_high, subporters_frame_std_dev_low;
+          
+
           should_send_lora_packet = true;
           detected = true;
         } else {

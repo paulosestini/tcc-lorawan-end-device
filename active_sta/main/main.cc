@@ -189,10 +189,11 @@ void config_print() {
 static uint8_t dummy[] = "NULL";
 static uint8_t detected_event[] = "EVENT DETECTED";
 
-static char power_data[11];
-static osjob_t sendjob;
+//static char power_data[11];
+//static osjob_t sendjob;
 const unsigned TX_INTERVAL = 1;
-extern "C" void do_send(osjob_t* j){
+//extern "C" void do_send(osjob_t* j){
+extern "C" void do_send(){
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
     // Check if there is not a current TX/RX job running
@@ -200,7 +201,8 @@ extern "C" void do_send(osjob_t* j){
         printf(("OP_TXRXPEND, not sending"));
     } else {
         if (should_send_lora_packet) {
-            LMIC_setTxData2(1, (uint8_t*) detected_event, sizeof(detected_event)-1, 0);
+            //LMIC_setTxData2(1, (uint8_t*) detected_event, sizeof(detected_event)-1, 0);
+            LMIC_setTxData2(1, lora_payload.data(), sizeof(detected_event)-1, 0);
             should_send_lora_packet = 0;
         } else {
             LMIC_setTxData2(1, (uint8_t*) dummy, sizeof(dummy)-1, 0);
@@ -249,7 +251,8 @@ extern "C" void onEvent (ev_t ev) {
             }
             // Schedule next transmission
             //os_setTimedCallback(&sendjob, os_getTime()+sec2osticks(TX_INTERVAL), do_send);
-            do_send(&sendjob);
+            //do_send(&sendjob);
+            do_send();
             break;
         case ev_t::EV_LOST_TSYNC:
             printf(("EV_LOST_TSYNC\n"));
@@ -307,7 +310,8 @@ extern "C" void lora_task(void *p) {
     //LMIC_selectSubBand(4);
     LMIC_setLinkCheckMode(0);
     LMIC.dn2Dr = DR_SF7;
-    do_send(&sendjob);
+    //do_send(&sendjob);
+    do_send();
 
     while(1) {
         os_runloop_once();
