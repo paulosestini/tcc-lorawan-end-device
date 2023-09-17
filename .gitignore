@@ -1,3 +1,4 @@
+.vscode/*
 export.ps1
 active_ap/build
 active_sta/build

@@ -29,8 +29,8 @@ typedef unsigned int uint;
 const int MAX_FRAMES = 500;
 const int N_SUBPORTERS = 64;
 const int N_NON_NULL_SUBPORTERS = 52;
-const int WINDOW_SIZE = 5;
-const float THRESHOLD_DETECTION = 0.3;
+const int WINDOW_SIZE = 10;
+const float THRESHOLD_DETECTION = 0.03;
 float reference_power = 0;
 float current_power = 0;
 MatrixXf frames(MAX_FRAMES, N_NON_NULL_SUBPORTERS);
@@ -40,7 +40,9 @@ ArrayXf csi_vector(N_NON_NULL_SUBPORTERS);
 ArrayXf subporters_frame_mean(N_NON_NULL_SUBPORTERS);
 ArrayXf subporters_frame_std_dev(N_NON_NULL_SUBPORTERS);
 ArrayXf full_lora_payload(2*N_NON_NULL_SUBPORTERS);
-Array<uint8_t, 1, 4*N_NON_NULL_SUBPORTERS> lora_payload;
+//Array<uint8_t, 1, 4*N_NON_NULL_SUBPORTERS> lora_payload;
+Array<uint8_t, 1, 12> lora_payload;
+
 int collected_frames = 0;
 bool detected = false;
 bool should_send_lora_packet = false;
@@ -140,7 +142,10 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
           
           
           full_lora_payload << subporters_frame_mean, subporters_frame_std_dev;
-          lora_payload << subporters_frame_mean_high, subporters_frame_mean_low, subporters_frame_std_dev_high, subporters_frame_std_dev_low;
+          lora_payload << subporters_frame_mean_high(Eigen::seq(0, 2)), 
+                          subporters_frame_mean_low(Eigen::seq(0, 2)),
+                          subporters_frame_std_dev_high(Eigen::seq(0, 2)),
+                          subporters_frame_std_dev_low(Eigen::seq(0, 2));
           
 
           should_send_lora_packet = true;

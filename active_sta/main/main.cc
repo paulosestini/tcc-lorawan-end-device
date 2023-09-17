@@ -202,7 +202,7 @@ extern "C" void do_send(){
     } else {
         if (should_send_lora_packet) {
             //LMIC_setTxData2(1, (uint8_t*) detected_event, sizeof(detected_event)-1, 0);
-            LMIC_setTxData2(1, lora_payload.data(), sizeof(detected_event)-1, 0);
+            LMIC_setTxData2(1, lora_payload.data(), sizeof(lora_payload), 0);
             should_send_lora_packet = 0;
         } else {
             LMIC_setTxData2(1, (uint8_t*) dummy, sizeof(dummy)-1, 0);
