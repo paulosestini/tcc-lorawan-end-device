@@ -200,13 +200,15 @@ extern "C" void do_send(){
     if (LMIC.opmode & OP_TXRXPEND) {
         printf(("OP_TXRXPEND, not sending"));
     } else {
-        if (should_send_lora_packet) {
+        // if (should_send_lora_packet) {
+            if(xSemaphoreTake(lmicSemaphore, portMAX_DELAY) == pdTRUE){
             //LMIC_setTxData2(1, (uint8_t*) detected_event, sizeof(detected_event)-1, 0);
             LMIC_setTxData2(1, lora_payload.data(), sizeof(lora_payload), 0);
-            should_send_lora_packet = 0;
-        } else {
-            LMIC_setTxData2(1, (uint8_t*) dummy, sizeof(dummy)-1, 0);
+            // should_send_lora_packet = 0;
         }
+        // else {
+        //     LMIC_setTxData2(1, (uint8_t*) dummy, sizeof(dummy)-1, 0);
+        // }
     }
     // Next TX is scheduled after TX_COMPLETE event.
 }
@@ -295,6 +297,7 @@ void os_getDevEui (u1_t* buf) { }
 void os_getDevKey (u1_t* buf) { }
 
 extern "C" void lora_task(void *p) {
+
     os_init();
     LMIC_reset();
     LMIC_setSession(0x13, DEVADDR, (xref2u1_t)&NWKSKEY, (xref2u1_t)&APPSKEY);
@@ -319,8 +322,8 @@ extern "C" void lora_task(void *p) {
 
 }
 
-
 extern "C" void app_main() {
+    lmicSemaphore = xSemaphoreCreateBinary();
     config_print();
     nvs_init();
     sd_init();
@@ -329,6 +332,7 @@ extern "C" void app_main() {
 #if !(SHOULD_COLLECT_CSI)
     printf("CSI will not be collected. Check `idf.py menuconfig  # > ESP32 CSI Tool Config` to enable CSI");
 #endif
+
 
     xTaskCreatePinnedToCore(&vTask_socket_transmitter_sta_loop, "socket_transmitter_sta_loop",
                             10000, (void *) &is_wifi_connected, 100, &xHandle, 1);

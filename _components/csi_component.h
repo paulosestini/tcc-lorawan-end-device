@@ -5,6 +5,7 @@
 #include "math.h"
 #include <sstream>
 #include <iostream>
+#include <freertos/semphr.h>
 
 #include <eigen3/Eigen/Eigen>
 using Eigen::Array;
@@ -23,6 +24,7 @@ char *project_type;
 #define CSI_TYPE CSI_RAW
 
 SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
+SemaphoreHandle_t lmicSemaphore = NULL;
 
 typedef unsigned int uint;
 // --------
@@ -150,6 +152,7 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
 
           should_send_lora_packet = true;
           detected = true;
+          xSemaphoreGive(lmicSemaphore);
         } else {
           detected = false;
         }
