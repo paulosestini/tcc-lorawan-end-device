@@ -1,6 +1,11 @@
 #ifndef ESP32_CSI_CSI_COMPONENT_H
 #define ESP32_CSI_CSI_COMPONENT_H
 
+#include "freertos/task.h"
+#include "esp_system.h"
+#include "esp_log.h"
+#include "esp_timer.h"
+
 #include "time_component.h"
 #include "math.h"
 #include <sstream>
@@ -23,8 +28,11 @@ char *project_type;
 
 #define CSI_TYPE CSI_RAW
 
+#define TIMEOUT_SECONDS 2
+
 SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
 SemaphoreHandle_t lmicSemaphore = NULL;
+static esp_timer_handle_t timeout_timer = NULL;
 
 typedef unsigned int uint;
 // --------
@@ -49,7 +57,8 @@ Array<uint8_t, 1, 12> lora_payload;
 int collected_frames = 0;
 bool detected = false;
 bool obj_in_sight = false;
-bool should_send = false;
+bool should_send = true;
+bool potential_danger = false;
 
 
 uint as_uint(const float x) {
@@ -108,6 +117,25 @@ void print_bits8(uint8_t value) {
     std::cout << std::endl;
 }
 
+static void timeout_callback(void* arg) {
+    potential_danger = true;
+    xSemaphoreGive(lmicSemaphore);
+    ESP_LOGI("TIMER", "Object blocking for the last %d seconds. Sending Alert.", TIMEOUT_SECONDS);
+    // Handle the timeout event here...
+    esp_timer_stop(timeout_timer);
+    esp_timer_start_once(timeout_timer, TIMEOUT_SECONDS * 1000000); //
+}
+
+void init_timeout_timer() {
+    // Initialize the timer
+    esp_timer_create_args_t timer_config = {
+        .callback = &timeout_callback,
+        .name = "Timeout Timer"
+    };
+    esp_timer_create(&timer_config, &timeout_timer);
+    esp_timer_start_once(timeout_timer, TIMEOUT_SECONDS * 1000000); // Convert seconds to microseconds
+}
+
 void process_csi(ArrayXf full_csi_vector, float rssi) {
 
   csi_vector << full_csi_vector(Eigen::seq(6, 31)), full_csi_vector(Eigen::seq(33, 58));
@@ -126,6 +154,7 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       reference_power = frames.sum() / MAX_FRAMES;
 
       printf("\n\n ----REFERENCE ESTABLISHED---- \n\n");
+      init_timeout_timer();
     } else {
       current_power = frames(Eigen::seq(MAX_FRAMES/2 - WINDOW_SIZE, MAX_FRAMES/2-1), Eigen::all).sum();
       current_power /= WINDOW_SIZE;
@@ -142,6 +171,10 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power){
         printf("\n DETECTED \n");
         obj_in_sight = true;
+      } else {
+        potential_danger = false;
+        esp_timer_stop(timeout_timer);
+        esp_timer_start_once(timeout_timer, TIMEOUT_SECONDS * 1000000);
       }
       
       if (should_send && obj_in_sight) {
