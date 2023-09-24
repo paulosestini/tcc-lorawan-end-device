@@ -45,14 +45,17 @@ ArrayXf full_lora_payload(2*N_NON_NULL_SUBPORTERS);
 //Array<uint8_t, 1, 4*N_NON_NULL_SUBPORTERS> lora_payload;
 Array<uint8_t, 1, 12> lora_payload;
 
+
 int collected_frames = 0;
 bool detected = false;
-bool should_send_lora_packet = false;
+bool obj_in_sight = false;
+bool should_send = false;
 
 
 uint as_uint(const float x) {
     return *(uint*)&x;
 }
+
 float as_float(const uint x) {
     return *(float*)&x;
 }
@@ -63,6 +66,7 @@ float half_to_float(const uint16_t x) { // IEEE-754 16-bit floating-point format
     const uint v = as_uint((float)m)>>23; // evil log2 bit hack to count leading zeros in denormalized format
     return as_float((x&0x8000)<<16 | (e!=0)*((e+112)<<23|m) | ((e==0)&(m!=0))*((v-37)<<23|((m<<(150-v))&0x007FE000))); // sign : normalized : denormalized
 }
+
 uint16_t float_to_half(const float x) { // IEEE-754 16-bit floating-point format (without infinity): 1-5-10, exp-15, +-131008.0, +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
     const uint b = as_uint(x)+0x00001000; // round-to-nearest-even: add last bit after truncated mantissa
     const uint e = (b&0x7F800000)>>23; // exponent
@@ -114,7 +118,7 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
 
   csi_vector *= scale_factor;
   csi_vector = 10 * (csi_vector + 1e-10 ).log10();
-
+  
   if(collected_frames < MAX_FRAMES) {
     frames.row(collected_frames) = csi_vector;
   } else {
@@ -127,11 +131,22 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       current_power /= WINDOW_SIZE;
 
         printf("Current power: %f, Reference power: %f \n", current_power, reference_power);
-
-
-      if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power) {
-        if(!detected) {
-          printf("\n DETECTED \n");
+      
+      if (current_power > (1 + THRESHOLD_DETECTION) * reference_power && should_send == false){
+        obj_in_sight = false;
+        should_send = true;
+        printf("\n SENDING CLEAR PACKAGE\n");
+        xSemaphoreGive(lmicSemaphore);
+      }
+      
+      if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power){
+        printf("\n DETECTED \n");
+        obj_in_sight = true;
+      }
+      
+      if (should_send && obj_in_sight) {
+          should_send = false;
+          printf("\n SENDING CSI PACKAGE\n");
           subporters_frame_mean << frames.transpose().rowwise().mean().array();
           subporters_frame_std_dev = ((frames.transpose().array().colwise() - subporters_frame_mean).square().rowwise().sum()/N_NON_NULL_SUBPORTERS).sqrt().array(); // standard deviation
           Array<uint16_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_mean_half = subporters_frame_mean.unaryExpr(&float_to_half).transpose();
@@ -149,14 +164,7 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
                           subporters_frame_std_dev_high(Eigen::seq(0, 2)),
                           subporters_frame_std_dev_low(Eigen::seq(0, 2));
           
-
-          should_send_lora_packet = true;
-          detected = true;
           xSemaphoreGive(lmicSemaphore);
-        } else {
-          detected = false;
-        }
-        
       }
     }
 
