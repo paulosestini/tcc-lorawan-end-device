@@ -1,5 +1,5 @@
 .vscode/*
 export.ps1
-active_ap/build
-active_sta/build
-active_*/managed_components/espressif__eigen/.component_hash
+ap/active_ap/build
+sta/active_sta/build
+sta/active_sta/managed_components/espressif__eigen/.component_hash

@@ -1,0 +1,67 @@
+.mainContainer {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Helvetica';
+    gap: 1em;
+    
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    overflow: auto;
+
+    margin: 2em;
+}
+
+.headerImages {
+    display: flex;
+    flex-direction: row;
+    align-self: center;
+    justify-content: center;
+    gap: 7em;
+}
+.appHeader {
+    align-self: center;
+}
+
+.logoImg {
+    width: 5%;
+}
+
+.appHeaderText {
+    font-family: 'Helvetica';
+    font-size: 3em;
+    color: #212121;
+}
+
+.filterName {
+    font-weight: bold;
+    color: #212121;
+}
+
+.eventFilters {
+    align-self: center;
+    display: flex;
+    flex-direction: row;
+    gap: 2em;
+    width: 50%;
+}
+
+.eventFilterGroup {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin: 1em;
+}
+
+.eventFilter {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#event-graph {
+    width: 80%;
+    align-self: center;
+}
