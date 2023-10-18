@@ -1,6 +1,11 @@
 #ifndef ESP32_CSI_CSI_COMPONENT_H
 #define ESP32_CSI_CSI_COMPONENT_H
 
+#include "freertos/task.h"
+#include "esp_system.h"
+#include "esp_log.h"
+#include "esp_timer.h"
+
 #include "time_component.h"
 #include "math.h"
 #include <sstream>
@@ -23,8 +28,11 @@ char *project_type;
 
 #define CSI_TYPE CSI_RAW
 
+#define TIMEOUT_SECONDS 99999
+
 SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
 SemaphoreHandle_t lmicSemaphore = NULL;
+static esp_timer_handle_t timeout_timer = NULL;
 
 typedef unsigned int uint;
 // --------
@@ -32,7 +40,8 @@ const int MAX_FRAMES = 500;
 const int N_SUBPORTERS = 64;
 const int N_NON_NULL_SUBPORTERS = 52;
 const int WINDOW_SIZE = 10;
-const float THRESHOLD_DETECTION = 0.03;
+const int N_FEATURES = 25;
+const float THRESHOLD_DETECTION = 0.10  ;
 float reference_power = 0;
 float current_power = 0;
 MatrixXf frames(MAX_FRAMES, N_NON_NULL_SUBPORTERS);
@@ -42,17 +51,25 @@ ArrayXf csi_vector(N_NON_NULL_SUBPORTERS);
 ArrayXf subporters_frame_mean(N_NON_NULL_SUBPORTERS);
 ArrayXf subporters_frame_std_dev(N_NON_NULL_SUBPORTERS);
 ArrayXf full_lora_payload(2*N_NON_NULL_SUBPORTERS);
+ArrayXf final_lora_payload(N_FEATURES);
+
 //Array<uint8_t, 1, 4*N_NON_NULL_SUBPORTERS> lora_payload;
-Array<uint8_t, 1, 12> lora_payload;
+Array<uint8_t, 1, 2*N_FEATURES> lora_payload;
+
+Eigen::VectorXi features_to_send(N_FEATURES);
+
 
 int collected_frames = 0;
 bool detected = false;
-bool should_send_lora_packet = false;
+bool obj_in_sight = false;
+bool should_send = true;
+bool potential_danger = false;
 
 
 uint as_uint(const float x) {
     return *(uint*)&x;
 }
+
 float as_float(const uint x) {
     return *(float*)&x;
 }
@@ -63,6 +80,7 @@ float half_to_float(const uint16_t x) { // IEEE-754 16-bit floating-point format
     const uint v = as_uint((float)m)>>23; // evil log2 bit hack to count leading zeros in denormalized format
     return as_float((x&0x8000)<<16 | (e!=0)*((e+112)<<23|m) | ((e==0)&(m!=0))*((v-37)<<23|((m<<(150-v))&0x007FE000))); // sign : normalized : denormalized
 }
+
 uint16_t float_to_half(const float x) { // IEEE-754 16-bit floating-point format (without infinity): 1-5-10, exp-15, +-131008.0, +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
     const uint b = as_uint(x)+0x00001000; // round-to-nearest-even: add last bit after truncated mantissa
     const uint e = (b&0x7F800000)>>23; // exponent
@@ -104,7 +122,30 @@ void print_bits8(uint8_t value) {
     std::cout << std::endl;
 }
 
+static void timeout_callback(void* arg) {
+    potential_danger = true;
+    xSemaphoreGive(lmicSemaphore);
+    ESP_LOGI("TIMER", "Object blocking for the last %d seconds. Sending Alert.", TIMEOUT_SECONDS);
+    // Handle the timeout event here...
+    esp_timer_stop(timeout_timer);
+    esp_timer_start_once(timeout_timer, TIMEOUT_SECONDS * 1000000); //
+}
+
+void init_timeout_timer() {
+    // Initialize the timer
+    esp_timer_create_args_t timer_config = {
+        .callback = &timeout_callback,
+        .name = "Timeout Timer"
+    };
+    esp_timer_create(&timer_config, &timeout_timer);
+    esp_timer_start_once(timeout_timer, TIMEOUT_SECONDS * 1000000); // Convert seconds to microseconds
+}
+
 void process_csi(ArrayXf full_csi_vector, float rssi) {
+  features_to_send << 40, 44, 41, 43, 42, 94, 95, 93, 46, 96, 92, 45, 39, 38, 36, 49, 97,
+            15, 14, 91, 47, 37, 64, 90, 48;
+
+
 
   csi_vector << full_csi_vector(Eigen::seq(6, 31)), full_csi_vector(Eigen::seq(33, 58));
 
@@ -114,7 +155,7 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
 
   csi_vector *= scale_factor;
   csi_vector = 10 * (csi_vector + 1e-10 ).log10();
-
+  
   if(collected_frames < MAX_FRAMES) {
     frames.row(collected_frames) = csi_vector;
   } else {
@@ -122,41 +163,62 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       reference_power = frames.sum() / MAX_FRAMES;
 
       printf("\n\n ----REFERENCE ESTABLISHED---- \n\n");
+      init_timeout_timer();
     } else {
       current_power = frames(Eigen::seq(MAX_FRAMES/2 - WINDOW_SIZE, MAX_FRAMES/2-1), Eigen::all).sum();
       current_power /= WINDOW_SIZE;
 
         printf("Current power: %f, Reference power: %f \n", current_power, reference_power);
-
-
-      if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power) {
-        if(!detected) {
-          printf("\n DETECTED \n");
-          subporters_frame_mean << frames.transpose().rowwise().mean().array();
-          subporters_frame_std_dev = ((frames.transpose().array().colwise() - subporters_frame_mean).square().rowwise().sum()/N_NON_NULL_SUBPORTERS).sqrt().array(); // standard deviation
-          Array<uint16_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_mean_half = subporters_frame_mean.unaryExpr(&float_to_half).transpose();
-          Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_mean_high = subporters_frame_mean_half.unaryExpr(&get_high);
-          Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_mean_low = subporters_frame_mean_half.unaryExpr(&get_low);
+      
+      if (current_power > (1 + THRESHOLD_DETECTION) * reference_power && should_send == false){
+        obj_in_sight = false;
+        should_send = true;
+        printf("\n SENDING CLEAR PACKAGE\n");
+        xSemaphoreGive(lmicSemaphore);
+      }
+      
+      if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power){
+        printf("\n DETECTED \n");
+        obj_in_sight = true;
+      } else {
+        potential_danger = false;
+        esp_timer_stop(timeout_timer);
+        esp_timer_start_once(timeout_timer, TIMEOUT_SECONDS * 1000000);
+      }
+      
+      if (should_send && obj_in_sight) {
+          should_send = false;
+          printf("\n SENDING CSI PACKAGE\n");
+          subporters_frame_mean << (frames / (reference_power / N_NON_NULL_SUBPORTERS)).transpose().rowwise().mean().array();
+          subporters_frame_std_dev = (((frames / (reference_power / N_NON_NULL_SUBPORTERS)).transpose().array().colwise() - subporters_frame_mean).square().rowwise().sum()/N_NON_NULL_SUBPORTERS).sqrt().array(); // standard deviation
           
-          Array<uint16_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_std_dev_half = subporters_frame_std_dev.unaryExpr(&float_to_half).transpose();
-          Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_std_dev_high = subporters_frame_std_dev_half.unaryExpr(&get_high);
-          Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_std_dev_low = subporters_frame_std_dev_half.unaryExpr(&get_low);
+          //Array<uint16_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_mean_half = subporters_frame_mean.unaryExpr(&float_to_half).transpose();
+          //Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_mean_high = subporters_frame_mean_half.unaryExpr(&get_high);
+          //Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_mean_low = subporters_frame_mean_half.unaryExpr(&get_low);
+          
+          //Array<uint16_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_std_dev_half = subporters_frame_std_dev.unaryExpr(&float_to_half).transpose();
+          //Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_std_dev_high = subporters_frame_std_dev_half.unaryExpr(&get_high);
+          //Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_std_dev_low = subporters_frame_std_dev_half.unaryExpr(&get_low);
           
           
           full_lora_payload << subporters_frame_mean, subporters_frame_std_dev;
-          lora_payload << subporters_frame_mean_high(Eigen::seq(0, 2)), 
-                          subporters_frame_mean_low(Eigen::seq(0, 2)),
-                          subporters_frame_std_dev_high(Eigen::seq(0, 2)),
-                          subporters_frame_std_dev_low(Eigen::seq(0, 2));
-          
 
-          should_send_lora_packet = true;
-          detected = true;
+          final_lora_payload << full_lora_payload(features_to_send);
+          Array<uint16_t, 1, N_FEATURES> final_lora_payload_half = final_lora_payload.unaryExpr(&float_to_half).transpose();
+          Array<uint8_t, 1, N_FEATURES> final_lora_payload_high = final_lora_payload_half.unaryExpr(&get_high);
+          Array<uint8_t, 1, N_FEATURES> final_lora_payload_low = final_lora_payload_half.unaryExpr(&get_low);
+
+
+
+
+
+          lora_payload << final_lora_payload_high, 
+                          final_lora_payload_low;
+        //                  subporters_frame_std_dev_high(Eigen::seq(0, 2)),
+        //                  subporters_frame_std_dev_low(Eigen::seq(0, 2));
+
+
           xSemaphoreGive(lmicSemaphore);
-        } else {
-          detected = false;
-        }
-        
       }
     }
 

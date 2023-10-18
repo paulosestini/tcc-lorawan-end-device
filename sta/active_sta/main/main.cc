@@ -186,8 +186,9 @@ void config_print() {
 }
 
 
-static uint8_t dummy[] = "NULL";
-static uint8_t detected_event[] = "EVENT DETECTED";
+static uint8_t obj_not_in_sight[] = "OBJECT NOT IN SIGHT";
+static uint8_t danger[] = "POTENTIAL DANGER";
+
 
 //static char power_data[11];
 //static osjob_t sendjob;
@@ -200,15 +201,17 @@ extern "C" void do_send(){
     if (LMIC.opmode & OP_TXRXPEND) {
         printf(("OP_TXRXPEND, not sending"));
     } else {
-        // if (should_send_lora_packet) {
             if(xSemaphoreTake(lmicSemaphore, portMAX_DELAY) == pdTRUE){
-            //LMIC_setTxData2(1, (uint8_t*) detected_event, sizeof(detected_event)-1, 0);
-            LMIC_setTxData2(1, lora_payload.data(), sizeof(lora_payload), 0);
-            // should_send_lora_packet = 0;
+                if (!obj_in_sight && !potential_danger){
+                    LMIC_setTxData2(1, (uint8_t*) obj_not_in_sight, sizeof(obj_not_in_sight)-1, 0);
+                }
+                if(obj_in_sight && !potential_danger){
+                    LMIC_setTxData2(1, lora_payload.data(), sizeof(lora_payload), 0);
+                }
+                else{
+                    LMIC_setTxData2(1, (uint8_t*) danger, sizeof(danger)-1, 0);
+                }
         }
-        // else {
-        //     LMIC_setTxData2(1, (uint8_t*) dummy, sizeof(dummy)-1, 0);
-        // }
     }
     // Next TX is scheduled after TX_COMPLETE event.
 }
