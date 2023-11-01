@@ -28,7 +28,7 @@ char *project_type;
 
 #define CSI_TYPE CSI_RAW
 
-#define TIMEOUT_SECONDS 99999
+#define TIMEOUT_SECONDS 120
 
 SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
 SemaphoreHandle_t lmicSemaphore = NULL;
@@ -39,9 +39,9 @@ typedef unsigned int uint;
 const int MAX_FRAMES = 500;
 const int N_SUBPORTERS = 64;
 const int N_NON_NULL_SUBPORTERS = 52;
-const int WINDOW_SIZE = 10;
+const int WINDOW_SIZE = 150;
 const int N_FEATURES = 25;
-const float THRESHOLD_DETECTION = 0.10  ;
+const float THRESHOLD_DETECTION = 0.03;
 float reference_power = 0;
 float current_power = 0;
 MatrixXf frames(MAX_FRAMES, N_NON_NULL_SUBPORTERS);
@@ -162,13 +162,13 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
     if(collected_frames == MAX_FRAMES) {
       reference_power = frames.sum() / MAX_FRAMES;
 
-      printf("\n\n ----REFERENCE ESTABLISHED---- \n\n");
+      printf("\n\n 324rty431----REFERENCE ESTABLISHED---- \n\n");
       init_timeout_timer();
     } else {
       current_power = frames(Eigen::seq(MAX_FRAMES/2 - WINDOW_SIZE, MAX_FRAMES/2-1), Eigen::all).sum();
       current_power /= WINDOW_SIZE;
 
-        printf("Current power: %f, Reference power: %f \n", current_power, reference_power);
+        // printf("Current power: %f, Reference power: %f \n", current_power, reference_power);
       
       if (current_power > (1 + THRESHOLD_DETECTION) * reference_power && should_send == false){
         obj_in_sight = false;
@@ -179,6 +179,15 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       
       if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power){
         printf("\n DETECTED \n");
+        std::cout << "324rty431" << "START_MATRIX\n";
+        for(int i = 0; i < frames.rows(); i++){
+            if( i % 50){
+                const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
+                vTaskDelay( xDelay );
+            }
+            std::cout << "324rty431" << frames.row(i) << std::endl;
+        }
+        std::cout << "324rty431" <<"END_MATRIX\n";
         obj_in_sight = true;
       } else {
         potential_danger = false;
@@ -188,7 +197,7 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       
       if (should_send && obj_in_sight) {
           should_send = false;
-          printf("\n SENDING CSI PACKAGE\n");
+        //   printf("\n SENDING CSI PACKAGE\n");
           subporters_frame_mean << (frames / (reference_power / N_NON_NULL_SUBPORTERS)).transpose().rowwise().mean().array();
           subporters_frame_std_dev = (((frames / (reference_power / N_NON_NULL_SUBPORTERS)).transpose().array().colwise() - subporters_frame_mean).square().rowwise().sum()/N_NON_NULL_SUBPORTERS).sqrt().array(); // standard deviation
           

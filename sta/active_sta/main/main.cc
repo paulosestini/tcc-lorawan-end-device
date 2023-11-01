@@ -339,5 +339,5 @@ extern "C" void app_main() {
 
     xTaskCreatePinnedToCore(&vTask_socket_transmitter_sta_loop, "socket_transmitter_sta_loop",
                             10000, (void *) &is_wifi_connected, 100, &xHandle, 1);
-    xTaskCreatePinnedToCore(&lora_task, "lora_task", 8192, NULL, 5, NULL, 0);
+    // xTaskCreatePinnedToCore(&lora_task, "lora_task", 8192, NULL, 5, NULL, 0);
 }

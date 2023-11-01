@@ -25,10 +25,10 @@ void socket_transmitter_sta_loop(bool (*is_wifi_connected)()) {
         caddr.sin_port = htons(2223);
         while (!is_wifi_connected()) {
             // wait until connected to AP
-            printf("wifi not connected. waiting...\n");
+            printf("324rty431wifi not connected. waiting...\n");
             vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
-        printf("initial wifi connection established.\n");
+        printf("324rty431initial wifi connection established.\n");
         if (inet_aton(ip, &caddr.sin_addr) == 0) {
             printf("ERROR: inet_aton\n");
             continue;
