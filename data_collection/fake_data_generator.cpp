@@ -11,7 +11,14 @@ int main() {
         mat.setRandom();
         
         // Printing start delimiter, the matrix, and end delimiter
-        std::cout << "START_MATRIX\n" << mat << "\nEND_MATRIX\n";
+        std::cout << "324rty431START_MATRIX\n";
+
+        for(int i = 0; i < mat.rows(); i++) {
+            std::cout << "324rty431" << mat.row(i) << std::endl;
+        }
+    
+        
+        std::cout << "324rty431END_MATRIX\n";
         
         // Flushing the output to make sure it is written immediately
         std::cout << std::flush;

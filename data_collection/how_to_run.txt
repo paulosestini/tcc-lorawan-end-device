@@ -3,6 +3,6 @@ g++ -I /usr/include/eigen3 fake_data_generator.cpp -o fake_data_generator.o
 
 run:
 ./fake_data_generator.o | tee output.txt
-python data_monitor.python
+python data_monitor.py
 
 To display image, change the filepath in display_matrix.py and run it.
