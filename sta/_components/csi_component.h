@@ -28,7 +28,7 @@ char *project_type;
 
 #define CSI_TYPE CSI_RAW
 
-#define TIMEOUT_SECONDS 99999
+#define TIMEOUT_SECONDS 120
 
 SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
 SemaphoreHandle_t lmicSemaphore = NULL;
@@ -39,9 +39,9 @@ typedef unsigned int uint;
 const int MAX_FRAMES = 500;
 const int N_SUBPORTERS = 64;
 const int N_NON_NULL_SUBPORTERS = 52;
-const int WINDOW_SIZE = 50;
+const int WINDOW_SIZE = 150;
 const int N_FEATURES = 25;
-const float THRESHOLD_DETECTION = 0.03  ;
+const float THRESHOLD_DETECTION = 0.03;
 float reference_power = 0;
 float current_power = 0;
 MatrixXf frames(MAX_FRAMES, N_NON_NULL_SUBPORTERS);
