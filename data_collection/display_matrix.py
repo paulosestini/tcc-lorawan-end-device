@@ -18,5 +18,5 @@ def plot_matrix(csv_file):
 
 if __name__ == "__main__":
     # Provide the path to your CSV file here
-    csv_file = 'matrices/matrix_2023-10-21_13-48-32.csv'
+    csv_file = 'matrices/matrix_2023-11-01_13-32-57.csv'
     plot_matrix(csv_file)
