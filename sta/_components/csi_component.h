@@ -179,15 +179,7 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       
       if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power){
         printf("\n DETECTED \n");
-        std::cout << "324rty431" << "START_MATRIX\n";
-        for(int i = 0; i < frames.rows(); i++){
-            if( i % 50){
-                const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
-                vTaskDelay( xDelay );
-            }
-            std::cout << "324rty431" << frames.row(i) << std::endl;
-        }
-        std::cout << "324rty431" <<"END_MATRIX\n";
+
         obj_in_sight = true;
       } else {
         potential_danger = false;
