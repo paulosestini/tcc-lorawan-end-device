@@ -179,15 +179,7 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       
       if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power){
         printf("\n DETECTED \n");
-        std::cout << "324rty431" << "START_MATRIX\n";
-        for(int i = 0; i < frames.rows(); i++){
-            if( i % 50){
-                const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
-                vTaskDelay( xDelay );
-            }
-            std::cout << "324rty431" << frames.row(i) << std::endl;
-        }
-        std::cout << "324rty431" <<"END_MATRIX\n";
+
         obj_in_sight = true;
       } else {
         potential_danger = false;
@@ -197,6 +189,16 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       
       if (should_send && obj_in_sight) {
           should_send = false;
+        std::cout << "324rty431" << "START_MATRIX\n";
+        for(int i = 0; i < frames.rows(); i++){
+            if( i % 50){
+                const TickType_t xDelay = 1 / portTICK_PERIOD_MS;
+                vTaskDelay( xDelay );
+            }
+            std::cout << "324rty431" << frames.row(i) << std::endl;
+        }
+        std::cout << "324rty431" <<"END_MATRIX\n";
+
         //   printf("\n SENDING CSI PACKAGE\n");
           subporters_frame_mean << (frames / (reference_power / N_NON_NULL_SUBPORTERS)).transpose().rowwise().mean().array();
           subporters_frame_std_dev = (((frames / (reference_power / N_NON_NULL_SUBPORTERS)).transpose().array().colwise() - subporters_frame_mean).square().rowwise().sum()/N_NON_NULL_SUBPORTERS).sqrt().array(); // standard deviation
