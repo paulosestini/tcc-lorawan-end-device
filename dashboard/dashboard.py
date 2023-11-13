@@ -26,7 +26,7 @@ dev_map = {
 }
 
 location_options = list(dev_map.keys())
-event_options = ["cow", "person", "car", "dog"]
+event_options = ["cow", "person", "car", "dog", "danger"]
 aggregation_options = {"Hour": "h", "Day": "d", "Week": "w", "Month": "m"}
 
 app.layout = html.Div(
