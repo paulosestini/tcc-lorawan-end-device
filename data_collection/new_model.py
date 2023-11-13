@@ -24,7 +24,10 @@ for file in files:
         filedata.mean(axis=0),
         filedata.std(axis=0)
     ])
-    data[file] = file_features
+
+    important_features = np.array([40, 44, 41, 43, 42, 94, 95, 93, 46, 96, 92, 45, 39, 38, 36, 49, 97,
+            15, 14, 91, 47, 37, 64, 90, 48])
+    data[file] = file_features[important_features]
 
     for key, value in label_map.items():
         if key in file:
