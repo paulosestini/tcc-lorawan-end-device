@@ -49,7 +49,8 @@ def lambda_handler(event, context):
     model_input = read_packet(body["data"])
     print('Model input: ', model_input)
     if model_input is None:
-        return {'statusCode': 200, 'body': 'Received Packet'}
+        save_event(dev_id=body["deviceInfo"]["devEui"], timestamp=body["time"], label='danger')
+        return {'statusCode': 200, 'body': 'Received danger packet'}
     
     model_input = model_input.reshape(1, -1)
 
