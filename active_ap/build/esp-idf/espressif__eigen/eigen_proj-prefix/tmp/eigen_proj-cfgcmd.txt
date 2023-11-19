@@ -1,0 +1,1 @@
+cmd='C:/Espressif/tools/cmake/3.23.1/bin/cmake.exe;-DCMAKE_BUILD_TYPE=Debug;-DCMAKE_INSTALL_PREFIX=C:/tcc-lorawan-end-device/active_ap/build/esp-idf/espressif__eigen/eigen-build/install;-DCMAKE_TOOLCHAIN_FILE=C:/Espressif/frameworks/esp-idf-v4.4.5/tools/cmake/toolchain-esp32.cmake;-GNinja;<SOURCE_DIR><SOURCE_SUBDIR>'

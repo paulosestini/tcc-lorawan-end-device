@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/tcc-lorawan-end-device/active_sta/managed_components/espressif__eigen/eigen/test/stdlist_overload.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildOfficial"
+		],
+		"name" : "stdlist_overload_1"
+	}
+}

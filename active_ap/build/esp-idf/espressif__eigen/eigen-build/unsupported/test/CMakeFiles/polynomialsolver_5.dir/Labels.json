@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/tcc-lorawan-end-device/active_ap/managed_components/espressif__eigen/eigen/unsupported/test/polynomialsolver.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildUnsupported"
+		],
+		"name" : "polynomialsolver_5"
+	}
+}

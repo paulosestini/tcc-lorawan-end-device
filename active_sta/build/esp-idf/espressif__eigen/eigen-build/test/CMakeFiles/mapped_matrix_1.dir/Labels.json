@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/tcc-lorawan-end-device/active_sta/managed_components/espressif__eigen/eigen/test/mapped_matrix.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildOfficial"
+		],
+		"name" : "mapped_matrix_1"
+	}
+}

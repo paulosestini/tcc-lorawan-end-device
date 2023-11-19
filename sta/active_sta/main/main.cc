@@ -186,7 +186,7 @@ void config_print() {
 }
 
 
-static uint8_t obj_not_in_sight[] = "OBJECT NOT IN SIGHT";
+// static uint8_t obj_not_in_sight[] = "OBJECT NOT IN SIGHT";
 static uint8_t danger[] = "POTENTIAL DANGER";
 
 
@@ -202,9 +202,9 @@ extern "C" void do_send(){
         printf(("OP_TXRXPEND, not sending"));
     } else {
             if(xSemaphoreTake(lmicSemaphore, portMAX_DELAY) == pdTRUE){
-                if (!obj_in_sight && !potential_danger){
-                    LMIC_setTxData2(1, (uint8_t*) obj_not_in_sight, sizeof(obj_not_in_sight)-1, 0);
-                }
+                // if (!obj_in_sight && !potential_danger){
+                //     LMIC_setTxData2(1, (uint8_t*) obj_not_in_sight, sizeof(obj_not_in_sight)-1, 0);
+                // }
                 if(obj_in_sight && !potential_danger){
                     LMIC_setTxData2(1, lora_payload.data(), sizeof(lora_payload), 0);
                 }
@@ -326,6 +326,7 @@ extern "C" void lora_task(void *p) {
 }
 
 extern "C" void app_main() {
+    // init_timeout_timer();
     lmicSemaphore = xSemaphoreCreateBinary();
     config_print();
     nvs_init();

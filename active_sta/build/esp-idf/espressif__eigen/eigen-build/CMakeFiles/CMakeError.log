@@ -1,0 +1,193 @@
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_Wshorten64to32 failed with the following output:
+Change Dir: C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Espressif/tools/ninja/1.10.2/ninja.exe cmTC_7e0ba && [1/2] Building CXX object CMakeFiles/cmTC_7e0ba.dir/src.cxx.obj
+FAILED: CMakeFiles/cmTC_7e0ba.dir/src.cxx.obj 
+C:\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch5-8.4.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-g++.exe -DCOMPILER_SUPPORT_Wshorten64to32  -mlongcalls -Wno-frame-address  -std=c++03 -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Werror   -Wshorten-64-to-32 -o CMakeFiles/cmTC_7e0ba.dir/src.cxx.obj -c C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp/src.cxx
+xtensa-esp32-elf-g++.exe: error: unrecognized command line option '-Wshorten-64-to-32'
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_Wenumconversion failed with the following output:
+Change Dir: C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Espressif/tools/ninja/1.10.2/ninja.exe cmTC_620e3 && [1/2] Building CXX object CMakeFiles/cmTC_620e3.dir/src.cxx.obj
+FAILED: CMakeFiles/cmTC_620e3.dir/src.cxx.obj 
+C:\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch5-8.4.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-g++.exe -DCOMPILER_SUPPORT_Wenumconversion  -mlongcalls -Wno-frame-address  -std=c++03 -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Werror   -Wenum-conversion -o CMakeFiles/cmTC_620e3.dir/src.cxx.obj -c C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp/src.cxx
+xtensa-esp32-elf-g++.exe: error: unrecognized command line option '-Wenum-conversion'; did you mean '-Wno-conversion'?
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_Wcpp11extensions failed with the following output:
+Change Dir: C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Espressif/tools/ninja/1.10.2/ninja.exe cmTC_cfcf4 && [1/2] Building CXX object CMakeFiles/cmTC_cfcf4.dir/src.cxx.obj
+FAILED: CMakeFiles/cmTC_cfcf4.dir/src.cxx.obj 
+C:\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch5-8.4.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-g++.exe -DCOMPILER_SUPPORT_Wcpp11extensions  -mlongcalls -Wno-frame-address  -std=c++03 -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Werror   -Wc++11-extensions -o CMakeFiles/cmTC_cfcf4.dir/src.cxx.obj -c C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp/src.cxx
+xtensa-esp32-elf-g++.exe: error: unrecognized command line option '-Wc++11-extensions'; did you mean '-fms-extensions'?
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_wd981 failed with the following output:
+Change Dir: C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Espressif/tools/ninja/1.10.2/ninja.exe cmTC_555a2 && [1/2] Building CXX object CMakeFiles/cmTC_555a2.dir/src.cxx.obj
+FAILED: CMakeFiles/cmTC_555a2.dir/src.cxx.obj 
+C:\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch5-8.4.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-g++.exe -DCOMPILER_SUPPORT_wd981  -mlongcalls -Wno-frame-address  -std=c++03 -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Wdouble-promotion -Wshadow -Wno-psabi -Wno-variadic-macros -Wno-long-long -fno-check-new -fno-common -fstrict-aliasing -Werror   -wd981 -o CMakeFiles/cmTC_555a2.dir/src.cxx.obj -c C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp/src.cxx
+xtensa-esp32-elf-g++.exe: error: unrecognized command line option '-wd981'
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_wd2304 failed with the following output:
+Change Dir: C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Espressif/tools/ninja/1.10.2/ninja.exe cmTC_28cc5 && [1/2] Building CXX object CMakeFiles/cmTC_28cc5.dir/src.cxx.obj
+FAILED: CMakeFiles/cmTC_28cc5.dir/src.cxx.obj 
+C:\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch5-8.4.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-g++.exe -DCOMPILER_SUPPORT_wd2304  -mlongcalls -Wno-frame-address  -std=c++03 -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Wdouble-promotion -Wshadow -Wno-psabi -Wno-variadic-macros -Wno-long-long -fno-check-new -fno-common -fstrict-aliasing -Werror   -wd2304 -o CMakeFiles/cmTC_28cc5.dir/src.cxx.obj -c C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp/src.cxx
+xtensa-esp32-elf-g++.exe: error: unrecognized command line option '-wd2304'
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_STRICTANSI failed with the following output:
+Change Dir: C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Espressif/tools/ninja/1.10.2/ninja.exe cmTC_788b0 && [1/2] Building CXX object CMakeFiles/cmTC_788b0.dir/src.cxx.obj
+FAILED: CMakeFiles/cmTC_788b0.dir/src.cxx.obj 
+C:\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch5-8.4.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-g++.exe -DCOMPILER_SUPPORT_STRICTANSI  -mlongcalls -Wno-frame-address  -std=c++03 -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Wdouble-promotion -Wshadow -Wno-psabi -Wno-variadic-macros -Wno-long-long -fno-check-new -fno-common -fstrict-aliasing -Werror   -strict-ansi -o CMakeFiles/cmTC_788b0.dir/src.cxx.obj -c C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp/src.cxx
+xtensa-esp32-elf-g++.exe: error: unrecognized command line option '-strict-ansi'; did you mean '-fstrict-enums'?
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_Qunusedarguments failed with the following output:
+Change Dir: C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Espressif/tools/ninja/1.10.2/ninja.exe cmTC_5b851 && [1/2] Building CXX object CMakeFiles/cmTC_5b851.dir/src.cxx.obj
+FAILED: CMakeFiles/cmTC_5b851.dir/src.cxx.obj 
+C:\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch5-8.4.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-g++.exe -DCOMPILER_SUPPORT_Qunusedarguments  -mlongcalls -Wno-frame-address  -std=c++03 -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Wdouble-promotion -Wshadow -Wno-psabi -Wno-variadic-macros -Wno-long-long -fno-check-new -fno-common -fstrict-aliasing -Werror   -Qunused-arguments -o CMakeFiles/cmTC_5b851.dir/src.cxx.obj -c C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp/src.cxx
+xtensa-esp32-elf-g++.exe: error: unrecognized command line option '-Qunused-arguments'; did you mean '-Wunused-parameter'?
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test COMPILER_SUPPORT_OPENMP failed with the following output:
+Change Dir: C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Espressif/tools/ninja/1.10.2/ninja.exe cmTC_00ec1 && [1/2] Building CXX object CMakeFiles/cmTC_00ec1.dir/src.cxx.obj
+FAILED: CMakeFiles/cmTC_00ec1.dir/src.cxx.obj 
+C:\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch5-8.4.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-g++.exe -DCOMPILER_SUPPORT_OPENMP  -mlongcalls -Wno-frame-address  -std=c++03 -pedantic -Wall -Wextra -Wundef -Wcast-align -Wchar-subscripts -Wnon-virtual-dtor -Wunused-local-typedefs -Wpointer-arith -Wwrite-strings -Wformat-security -Wlogical-op -Wdouble-promotion -Wshadow -Wno-psabi -Wno-variadic-macros -Wno-long-long -fno-check-new -fno-common -fstrict-aliasing -ansi    -fopenmp -o CMakeFiles/cmTC_00ec1.dir/src.cxx.obj -c C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp/src.cxx
+xtensa-esp32-elf-g++.exe: error: unrecognized command line option '-pthread'
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+int main() { return 0; }
+Looking for a Fortran compiler failed with the following output:
+-- The Fortran compiler identification is unknown
+CMake Error at CMakeLists.txt:2 (project):
+  No CMAKE_Fortran_COMPILER could be found.
+
+  Tell CMake where to find the compiler by setting either the environment
+  variable "FC" or the CMake cache entry CMAKE_Fortran_COMPILER to the full
+  path to the compiler, or to the compiler name if it is in the PATH.
+
+
+-- Configuring incomplete, errors occurred!
+See also "C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/test/CMakeFiles/CheckFortran/CMakeFiles/CMakeOutput.log".
+See also "C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/test/CMakeFiles/CheckFortran/CMakeFiles/CMakeError.log".
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Espressif/tools/ninja/1.10.2/ninja.exe cmTC_e3a36 && [1/2] Building C object CMakeFiles/cmTC_e3a36.dir/src.c.obj
+[2/2] Linking C executable cmTC_e3a36
+FAILED: cmTC_e3a36 
+cmd.exe /C "cd . && C:\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch5-8.4.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-gcc.exe -mlongcalls -Wno-frame-address  CMakeFiles/cmTC_e3a36.dir/src.c.obj -o cmTC_e3a36   && cd ."
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: CMakeFiles/cmTC_e3a36.dir/src.c.obj:(.literal+0x4): undefined reference to `pthread_create'
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: CMakeFiles/cmTC_e3a36.dir/src.c.obj:(.literal+0x8): undefined reference to `pthread_detach'
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: CMakeFiles/cmTC_e3a36.dir/src.c.obj:(.literal+0xc): undefined reference to `pthread_cancel'
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: CMakeFiles/cmTC_e3a36.dir/src.c.obj:(.literal+0x10): undefined reference to `pthread_join'
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: CMakeFiles/cmTC_e3a36.dir/src.c.obj:(.literal+0x14): undefined reference to `pthread_atfork'
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: CMakeFiles/cmTC_e3a36.dir/src.c.obj:(.literal+0x18): undefined reference to `pthread_exit'
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: CMakeFiles/cmTC_e3a36.dir/src.c.obj: in function `main':
+src.c:(.text+0x1c): undefined reference to `pthread_create'
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: src.c:(.text+0x26): undefined reference to `pthread_detach'
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: src.c:(.text+0x30): undefined reference to `pthread_cancel'
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: src.c:(.text+0x3c): undefined reference to `pthread_join'
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: src.c:(.text+0x48): undefined reference to `pthread_atfork'
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: src.c:(.text+0x50): undefined reference to `pthread_exit'
+collect2.exe: error: ld returned 1 exit status
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+#include <pthread.h>
+
+static void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_cancel(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Espressif/tools/ninja/1.10.2/ninja.exe cmTC_0f462 && [1/2] Building C object CMakeFiles/cmTC_0f462.dir/CheckFunctionExists.c.obj
+[2/2] Linking C executable cmTC_0f462
+FAILED: cmTC_0f462 
+cmd.exe /C "cd . && C:\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch5-8.4.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-gcc.exe -mlongcalls -Wno-frame-address  -DCHECK_FUNCTION_EXISTS=pthread_create  CMakeFiles/cmTC_0f462.dir/CheckFunctionExists.c.obj -o cmTC_0f462  -lpthreads && cd ."
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: cannot find -lpthreads
+collect2.exe: error: ld returned 1 exit status
+ninja: build stopped: subcommand failed.
+
+
+
+Determining if the function pthread_create exists in the pthread failed with the following output:
+Change Dir: C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Espressif/tools/ninja/1.10.2/ninja.exe cmTC_2296e && [1/2] Building C object CMakeFiles/cmTC_2296e.dir/CheckFunctionExists.c.obj
+[2/2] Linking C executable cmTC_2296e
+FAILED: cmTC_2296e 
+cmd.exe /C "cd . && C:\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch5-8.4.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-gcc.exe -mlongcalls -Wno-frame-address  -DCHECK_FUNCTION_EXISTS=pthread_create  CMakeFiles/cmTC_2296e.dir/CheckFunctionExists.c.obj -o cmTC_2296e  -lpthread && cd ."
+c:/espressif/tools/xtensa-esp32-elf/esp-2021r2-patch5-8.4.0/xtensa-esp32-elf/bin/../lib/gcc/xtensa-esp32-elf/8.4.0/../../../../xtensa-esp32-elf/bin/ld.exe: cannot find -lpthread
+collect2.exe: error: ld returned 1 exit status
+ninja: build stopped: subcommand failed.
+
+
+
+Determining if compiler accepts -pthread failed with the following output:
+Change Dir: C:/tcc-lorawan-end-device/active_sta/build/esp-idf/espressif__eigen/eigen-build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):C:/Espressif/tools/ninja/1.10.2/ninja.exe cmTC_eae0e && [1/2] Building C object CMakeFiles/cmTC_eae0e.dir/CheckForPthreads.c.obj
+[2/2] Linking C executable cmTC_eae0e
+FAILED: cmTC_eae0e 
+cmd.exe /C "cd . && C:\Espressif\tools\xtensa-esp32-elf\esp-2021r2-patch5-8.4.0\xtensa-esp32-elf\bin\xtensa-esp32-elf-gcc.exe -mlongcalls -Wno-frame-address  CMakeFiles/cmTC_eae0e.dir/CheckForPthreads.c.obj -o cmTC_eae0e  -pthread && cd ."
+xtensa-esp32-elf-gcc.exe: error: unrecognized command line option '-pthread'
+ninja: build stopped: subcommand failed.
+
+
+

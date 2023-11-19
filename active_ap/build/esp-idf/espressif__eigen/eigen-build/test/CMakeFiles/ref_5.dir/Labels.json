@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/tcc-lorawan-end-device/active_ap/managed_components/espressif__eigen/eigen/test/ref.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildOfficial"
+		],
+		"name" : "ref_5"
+	}
+}

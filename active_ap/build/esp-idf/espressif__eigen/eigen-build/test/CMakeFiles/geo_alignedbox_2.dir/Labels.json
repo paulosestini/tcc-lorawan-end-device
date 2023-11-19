@@ -1,0 +1,16 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "C:/tcc-lorawan-end-device/active_ap/managed_components/espressif__eigen/eigen/test/geo_alignedbox.cpp"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"BuildOfficial"
+		],
+		"name" : "geo_alignedbox_2"
+	}
+}
