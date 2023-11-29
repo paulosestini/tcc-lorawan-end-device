@@ -40,8 +40,8 @@ const int MAX_FRAMES = 500;
 const int N_SUBPORTERS = 64;
 const int N_NON_NULL_SUBPORTERS = 52;
 const int WINDOW_SIZE = 150;
-const int N_FEATURES = 25;
-const float THRESHOLD_DETECTION = 0.075;
+const int N_FEATURES = 16;
+const float THRESHOLD_DETECTION = 0.0415;
 float reference_power = 0;
 float current_power = 0;
 MatrixXf frames(MAX_FRAMES, N_NON_NULL_SUBPORTERS);
@@ -142,8 +142,8 @@ void init_timeout_timer() {
 }
 
 void process_csi(ArrayXf full_csi_vector, float rssi) {
-  features_to_send << 40, 44, 41, 43, 42, 94, 95, 93, 46, 96, 92, 45, 39, 38, 36, 49, 97,
-            15, 14, 91, 47, 37, 64, 90, 48;
+  features_to_send << 70,  71,  69,  72,  31,  35,  16, 102,  37,  39, 101,  36, 103,
+        33,  20, 100;
 
 
 
@@ -189,8 +189,8 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       if (should_send && obj_in_sight) {
           should_send = false;
           printf("\n SENDING CSI PACKAGE\n");
-          subporters_frame_mean << (frames / (reference_power / N_NON_NULL_SUBPORTERS)).transpose().rowwise().mean().array();
-          subporters_frame_std_dev = (((frames / (reference_power / N_NON_NULL_SUBPORTERS)).transpose().array().colwise() - subporters_frame_mean).square().rowwise().sum()/N_NON_NULL_SUBPORTERS).sqrt().array(); // standard deviation
+          subporters_frame_mean << (frames / (frames.mean())).transpose().rowwise().mean().array();
+          subporters_frame_std_dev = (((frames / (frames.mean())).transpose().array().colwise() - subporters_frame_mean).square().rowwise().sum()/MAX_FRAMES).sqrt().array(); // standard deviation
           
           //Array<uint16_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_mean_half = subporters_frame_mean.unaryExpr(&float_to_half).transpose();
           //Array<uint8_t, 1, N_NON_NULL_SUBPORTERS> subporters_frame_mean_high = subporters_frame_mean_half.unaryExpr(&get_high);
