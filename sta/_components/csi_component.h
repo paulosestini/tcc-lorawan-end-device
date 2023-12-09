@@ -162,7 +162,7 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
     if(collected_frames == MAX_FRAMES) {
       reference_power = frames.sum() / MAX_FRAMES;
 
-      printf("\n\n 324rty431----REFERENCE ESTABLISHED---- \n\n");
+      printf("\n\n ----REFERENCE ESTABLISHED---- \n\n");
       init_timeout_timer();
     } else {
       current_power = frames(Eigen::seq(MAX_FRAMES/2 - WINDOW_SIZE, MAX_FRAMES/2-1), Eigen::all).sum();
