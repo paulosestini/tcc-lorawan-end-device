@@ -17,9 +17,12 @@ db_connection = pymysql.connect(
     database=os.getenv("DB_NAME"),
 )
 
-label_map = {0: "background", 1: "person", 2: "car", 3: "dog", 4: "cow"}
+label_map = {
+    0: 'person',
+    1: 'car'
+}
 
-n_features = 25
+n_features = 16
 
 def build_float16(float_in_int):
     float16_value = np.frombuffer(
@@ -49,7 +52,7 @@ def lambda_handler(event, context):
     model_input = read_packet(body["data"])
     print('Model input: ', model_input)
     if model_input is None:
-        save_event(dev_id=body["deviceInfo"]["devEui"], timestamp=body["time"], label='danger')
+        #save_event(dev_id=body["deviceInfo"]["devEui"], timestamp=body["time"], label='danger')
         return {'statusCode': 200, 'body': 'Received danger packet'}
     
     model_input = model_input.reshape(1, -1)

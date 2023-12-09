@@ -5,7 +5,7 @@ from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-BASE_DIR = 'filtered_data'
+BASE_DIR = 'new_matrices'
 files = os.listdir(BASE_DIR)
 
 
