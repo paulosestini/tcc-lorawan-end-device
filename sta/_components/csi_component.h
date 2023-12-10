@@ -168,7 +168,7 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       current_power = frames(Eigen::seq(MAX_FRAMES/2 - WINDOW_SIZE, MAX_FRAMES/2-1), Eigen::all).sum();
       current_power /= WINDOW_SIZE;
 
-        printf("Current power: %f, Reference power: %f \n", current_power, reference_power);
+        // printf("Current power: %f, Reference power: %f \n", current_power, reference_power);
       
       if (current_power > (1 + THRESHOLD_DETECTION) * reference_power && should_send == false){
         obj_in_sight = false;
@@ -179,6 +179,7 @@ void process_csi(ArrayXf full_csi_vector, float rssi) {
       
       if (current_power <= (1 + THRESHOLD_DETECTION) * reference_power){
         printf("\n DETECTED \n");
+
         obj_in_sight = true;
       } else {
         potential_danger = false;
