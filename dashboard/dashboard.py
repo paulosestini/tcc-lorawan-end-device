@@ -8,7 +8,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 import os
 import dotenv
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import plotly.graph_objects as go
 from dash.dash_table import DataTable
@@ -29,14 +29,14 @@ dev_map = {
 }
 
 location_options = list(dev_map.keys())
-event_options = ["cow", "person", "car", "dog", "danger"]
+event_options = ["cow", "person", "car", "dog", "danger", "event"]
 aggregation_options = {"Minute": "T", "Hour": "h", "Day": "d", "Week": "w", "Month": "m"}
 
 app.layout = html.Div(
     [
         dcc.Interval(
             id='interval-component',
-            interval=5*1000,  # in milliseconds, e.g., 2*1000 for 2 seconds
+            interval=2*1000,  # in milliseconds, e.g., 2*1000 for 2 seconds
             n_intervals=0,
         ),
         html.Div(
@@ -57,6 +57,16 @@ app.layout = html.Div(
         ),
         html.Div(
             [
+
+                html.Div([
+                    html.H3("Alerta"),
+                    dcc.Graph(id='circle-graph', style={'height': '50px', 'width': '50px'}),
+                    dcc.Interval(
+                        id='circle-interval-component',
+                        interval=1*1000,  # in milliseconds
+                        n_intervals=0
+                    ),
+                    ]),
                 html.Div(
                     [
                         html.Div(
@@ -154,11 +164,14 @@ def update_event_graph(n, location, event, start_date, end_date, aggregation):
             select ts, label as event
             from events
             where dev_id='{dev_map[location]}'
-            and label='{event}';
+            and label='{event}'
+            and ts >= '{start_date.split('T')[0]} 00:00'
+            and ts <= '{end_date.split('T')[0]} 23:59'
+            ;
         """,
         db_connection,
     )
-
+    
     if len(df) != 0:
         df = (
             df.set_index("ts")
@@ -220,6 +233,46 @@ def update_event_table(n, location, event, start_date, end_date, aggregation):
     ]
 
     return table_data
+
+@app.callback(
+    Output('circle-graph', 'figure'),
+    Input('circle-interval-component', 'n_intervals'),
+    Input("location-filter", "value"),
+)
+def update_circle_color(n, location):
+    query = f"""
+        select ts, label as event
+        from events
+        where dev_id='{dev_map[location]}'
+        and label='danger'
+        and ts >= '{datetime.utcnow() - timedelta(seconds=5)}'
+        ;
+        """
+    
+    df = pd.read_sql(
+        query,
+        db_connection,
+    )
+
+
+    color = 'red' if not df.empty else 'green'
+
+    fig = go.Figure(data=[go.Scatter(
+        x=[0.5],
+        y=[0.5],
+        mode='markers',
+        marker=dict(size=50, color=color)
+    )])
+
+    fig.update_layout(
+        xaxis=dict(range=[0, 1], showgrid=False, zeroline=False, visible=False),
+        yaxis=dict(range=[0, 1], showgrid=False, zeroline=False, visible=False),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        margin=dict(l=0, r=0, t=0, b=0)
+    )
+    
+    return fig
 
 if __name__ == "__main__":
     app.run(debug=True)

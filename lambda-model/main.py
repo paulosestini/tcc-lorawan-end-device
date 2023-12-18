@@ -33,6 +33,10 @@ def build_float16(float_in_int):
 
 def read_packet(packet):
     packet = base64.b64decode(packet)
+
+    if len(packet) == 16:
+        return "DANGER"
+
     if len(packet) < 2 * n_features:
         return None
     features_high = map(lambda x: x << 8, packet[:n_features])
@@ -51,8 +55,9 @@ def lambda_handler(event, context):
     print('Event body: ', body)
     model_input = read_packet(body["data"])
     print('Model input: ', model_input)
-    if model_input is None:
-        #save_event(dev_id=body["deviceInfo"]["devEui"], timestamp=body["time"], label='danger')
+
+    if model_input == "DANGER":
+        save_event(dev_id=body["deviceInfo"]["devEui"], timestamp=body["time"], label='danger')
         return {'statusCode': 200, 'body': 'Received danger packet'}
     
     model_input = model_input.reshape(1, -1)
@@ -64,7 +69,8 @@ def lambda_handler(event, context):
     pred = model.predict(model_input)
     pred = label_map[pred[0]]
 
-    save_event(dev_id=body["deviceInfo"]["devEui"], timestamp=body["time"], label=pred)
+    save_event(dev_id=body["deviceInfo"]["devEui"], timestamp=body["time"], label='event')
+    #save_event(dev_id=body["deviceInfo"]["devEui"], timestamp=body["time"], label=pred)
 
     return {'statusCode': 200, 'body': 'Received CSI Features'}
 
